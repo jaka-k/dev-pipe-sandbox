@@ -1,0 +1,9 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Standard build command.
+  cmd = "go build -o ./tmp/main main.go"
+
+  # The binary to run
+  bin = "./tmp/main"

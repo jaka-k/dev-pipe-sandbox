@@ -1,0 +1,25 @@
+# --- Air & Build Artifacts ---
+# 'air' creates this tmp folder for live builds
+tmp/
+# Ignore the binary generated in the root (if you run 'go build' manually)
+dev-pipe-sandbox
+main
+
+# --- GoLand (JetBrains) ---
+.idea/
+*.iws
+*.iml
+out/
+
+# --- Go Standard ---
+# Binaries and OS-specific build files
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# --- macOS ---
+.DS_Store

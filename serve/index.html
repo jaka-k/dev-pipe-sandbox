@@ -25,7 +25,7 @@
     <div class="column">
         <h2>Dev Branch A</h2>
         <form id="form-left">
-            <textarea id="left-input" name="code">{{ .Content }}</textarea>
+            <textarea id="left-input" name="code">## Draft A</textarea>
             <div class="controls">
                 <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#left-input">Commit</button>
                 <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#left-input">Merge to Main</button>
@@ -35,13 +35,15 @@
 
     <div class="column">
         <h2>Production (Rendered)</h2>
-        <div id="middle-display">{{ .Rendered }}</div>
+        <div id="middle-display" hx-get="/source" hx-trigger="load">
+            Loading source of truth...
+        </div>
     </div>
 
     <div class="column">
         <h2>Dev Branch B</h2>
         <form id="form-right">
-            <textarea id="right-input" name="code">{{ .Content }}</textarea>
+            <textarea id="right-input" name="code">## Draft B</textarea>
             <div class="controls">
                 <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#right-input">Commit</button>
                 <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#right-input">Merge to Main</button>
