@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Render-Pipe Environment</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <style>
+        body { margin: 0; font-family: monospace; height: 100vh; overflow: hidden; background: #1e1e1e; color: #ddd; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr 1fr; height: 100%; gap: 2px; background: #333; }
+        .column { background: #1e1e1e; display: flex; flex-direction: column; padding: 10px; }
+        h2 { text-align: center; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: #888; }
+        textarea { flex-grow: 1; background: #252526; color: #d4d4d4; border: 1px solid #333; padding: 10px; resize: none; outline: none; font-family: inherit; }
+        #middle-display { flex-grow: 1; background: #fff; color: #000; padding: 20px; overflow-y: auto; }
+        .controls { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; padding: 10px; cursor: pointer; border: none; font-weight: bold; }
+        .btn-commit { background: #4caf50; color: white; }
+        .btn-merge  { background: #f44336; color: white; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="grid-container">
+    <div class="column">
+        <h2>Dev Branch A</h2>
+        <form id="form-left">
+            <textarea id="left-input" name="code">{{ .Content }}</textarea>
+            <div class="controls">
+                <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#left-input">Commit</button>
+                <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#left-input">Merge to Main</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="column">
+        <h2>Production (Rendered)</h2>
+        <div id="middle-display">{{ .Rendered }}</div>
+    </div>
+
+    <div class="column">
+        <h2>Dev Branch B</h2>
+        <form id="form-right">
+            <textarea id="right-input" name="code">{{ .Content }}</textarea>
+            <div class="controls">
+                <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#right-input">Commit</button>
+                <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#right-input">Merge to Main</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
