@@ -116,17 +116,17 @@
                           onscroll="syncScroll('left-input', 'left-pre')">Loading...</textarea>
             </div>
             <div class="ui two bottom attached buttons">
-                <button class="ui primary button" hx-post="/render" hx-target="#middle-display" hx-include="#left-input">Commit</button>
-                <button class="ui violet button" hx-post="/merge" hx-target="#middle-display" hx-include="#left-input">Merge</button>
+                <button class="ui green button" hx-post="/render" hx-target="#middle-code" hx-include="#left-input">Commit</button>
+                <button class="ui violet button" hx-post="/merge" hx-target="#middle-code" hx-include="#left-input">Merge</button>
             </div>
         </div>
 
         <!-- Middle Column -->
         <div class="column" style="height: 100%; display: flex; flex-direction: column;">
-            <h4 class="ui top attached block header">Production (Preview)</h4>
+            <h4 class="ui top attached block header">Auto Dev Branch</h4>
             <div id="middle-display" class="ui attached segment" 
                  style="flex: 1; overflow-y: auto; background: #fff; padding: 0;">
-                <pre class="line-numbers" style="margin: 0; height: 100%; border: none;"><code id="middle-code" class="language-html" hx-get="/source/branch/master" hx-trigger="load">Loading...</code></pre>
+                <pre class="line-numbers" style="margin: 0; height: 100%; border: none;"><code id="middle-code" class="language-html" hx-get="/source/branch/dev" hx-trigger="load">Loading...</code></pre>
             </div>
         </div>
 
