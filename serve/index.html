@@ -25,7 +25,10 @@
     <div class="column">
         <h2>Dev Branch A</h2>
         <form id="form-left">
-            <textarea id="left-input" name="code">## Draft A</textarea>
+            <textarea id="left-input" name="code" 
+                      hx-get="/source/branch/branch-a" 
+                      hx-trigger="load" 
+                      hx-swap="none">Loading branch-a...</textarea>
             <div class="controls">
                 <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#left-input">Commit</button>
                 <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#left-input">Merge to Main</button>
@@ -35,7 +38,7 @@
 
     <div class="column">
         <h2>Production (Rendered)</h2>
-        <div id="middle-display" hx-get="/source" hx-trigger="load">
+        <div id="middle-display" hx-get="/source/branch/master" hx-trigger="load">
             Loading source of truth...
         </div>
     </div>
@@ -43,7 +46,10 @@
     <div class="column">
         <h2>Dev Branch B</h2>
         <form id="form-right">
-            <textarea id="right-input" name="code">## Draft B</textarea>
+            <textarea id="right-input" name="code" 
+                      hx-get="/source/branch/branch-b" 
+                      hx-trigger="load" 
+                      hx-swap="none">Loading branch-b...</textarea>
             <div class="controls">
                 <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#right-input">Commit</button>
                 <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#right-input">Merge to Main</button>
@@ -51,6 +57,16 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        // Check if the triggering element is one of our textareas
+        if (evt.detail.elt.tagName === 'TEXTAREA' && (evt.detail.elt.id === 'left-input' || evt.detail.elt.id === 'right-input')) {
+            // Directly set the value property to the response text
+            evt.detail.elt.value = evt.detail.xhr.responseText;
+        }
+    });
+</script>
 
 </body>
 </html>
