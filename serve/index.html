@@ -4,67 +4,210 @@
     <meta charset="UTF-8">
     <title>Render-Pipe Environment</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css">
+    
+    <!-- Prism JS for HTML Syntax Highlighting & Line Numbers -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    
     <style>
-        body { margin: 0; font-family: monospace; height: 100vh; overflow: hidden; background: #1e1e1e; color: #ddd; }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr 1fr; height: 100%; gap: 2px; background: #333; }
-        .column { background: #1e1e1e; display: flex; flex-direction: column; padding: 10px; }
-        h2 { text-align: center; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: #888; }
-        textarea { flex-grow: 1; background: #252526; color: #d4d4d4; border: 1px solid #333; padding: 10px; resize: none; outline: none; font-family: inherit; }
-        #middle-display { flex-grow: 1; background: #fff; color: #000; padding: 20px; overflow-y: auto; }
-        .controls { display: flex; gap: 10px; margin-top: 10px; }
-        button { flex: 1; padding: 10px; cursor: pointer; border: none; font-weight: bold; }
-        .btn-commit { background: #4caf50; color: white; }
-        .btn-merge  { background: #f44336; color: white; }
-        button:hover { opacity: 0.9; }
+        /* Modern Code Editor Style */
+        .code-editor {
+            position: relative;
+            height: 100%;
+            background: #fdfdfd;
+            border: 1px solid rgba(34, 36, 38, 0.15);
+            border-radius: 0 0 0.28571429rem 0.28571429rem;
+            overflow: hidden;
+        }
+        
+        /* Shared typography for perfect alignment */
+        .code-editor textarea, 
+        .code-editor pre {
+            margin: 0 !important;
+            border: none !important;
+            box-sizing: border-box !important;
+            font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+            tab-size: 4 !important;
+        }
+
+        .code-editor textarea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            padding: 10px 10px 10px 3.8em !important; /* Left padding for line numbers */
+            color: transparent !important;
+            background: transparent !important;
+            caret-color: #2185d0; /* Semantic UI Blue */
+            resize: none;
+            outline: none;
+            overflow: auto;
+            white-space: pre !important;
+        }
+
+        .code-editor pre {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            padding: 10px 10px 10px 3.8em !important; /* Left padding for line numbers */
+            background: transparent !important;
+            pointer-events: none;
+            overflow: hidden !important; /* Managed by textarea scroll */
+        }
+
+        /* Fix line numbers alignment */
+        .line-numbers .line-numbers-rows {
+            position: absolute;
+            pointer-events: none;
+            top: 0 !important; /* Relative to code element which is already padded */
+            left: -3.8em !important; /* Move back into the padding area */
+            width: 3em !important; /* Fixed gutter width */
+            letter-spacing: -1px;
+            border-right: 1px solid #ddd !important;
+            user-select: none;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .line-numbers-rows > span:before {
+            display: block;
+            padding-right: 0.5em;
+            text-align: right;
+            color: #999;
+        }
+
+        /* Set highlight text color to light violet */
+        ::selection {
+            background: #e0b0ff; /* Light violet/lavender */
+            color: #000;
+        }
+        ::-moz-selection {
+            background: #e0b0ff;
+            color: #000;
+        }
     </style>
 </head>
 <body>
 
-<div class="grid-container">
-    <div class="column">
-        <h2>Dev Branch A</h2>
-        <form id="form-left">
-            <textarea id="left-input" name="code" 
-                      hx-get="/source/branch/branch-a" 
-                      hx-trigger="load" 
-                      hx-swap="none">Loading branch-a...</textarea>
-            <div class="controls">
-                <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#left-input">Commit</button>
-                <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#left-input">Merge to Main</button>
+<div class="ui fluid container" style="padding: 1rem; height: 100vh; display: flex; flex-direction: column;">
+    <div class="ui three column grid" style="flex: 1; margin: 0;">
+        
+        <!-- Left Column -->
+        <div class="column" style="height: 100%; display: flex; flex-direction: column;">
+            <h4 class="ui top attached block header">Dev Branch A</h4>
+            <div class="code-editor">
+                <pre id="left-pre" class="line-numbers"><code id="left-code" class="language-html"></code></pre>
+                <textarea id="left-input" name="code" 
+                          hx-get="/source/branch/branch-a" 
+                          hx-trigger="load" 
+                          hx-swap="none"
+                          spellcheck="false"
+                          oninput="syncEditor('left-input', 'left-code')"
+                          onscroll="syncScroll('left-input', 'left-pre')">Loading...</textarea>
             </div>
-        </form>
-    </div>
-
-    <div class="column">
-        <h2>Production (Rendered)</h2>
-        <div id="middle-display" hx-get="/source/branch/master" hx-trigger="load">
-            Loading source of truth...
+            <div class="ui two bottom attached buttons">
+                <button class="ui primary button" hx-post="/render" hx-target="#middle-display" hx-include="#left-input">Commit</button>
+                <button class="ui violet button" hx-post="/merge" hx-target="#middle-display" hx-include="#left-input">Merge</button>
+            </div>
         </div>
-    </div>
 
-    <div class="column">
-        <h2>Dev Branch B</h2>
-        <form id="form-right">
-            <textarea id="right-input" name="code" 
-                      hx-get="/source/branch/branch-b" 
-                      hx-trigger="load" 
-                      hx-swap="none">Loading branch-b...</textarea>
-            <div class="controls">
-                <button class="btn-commit" hx-post="/render" hx-target="#middle-display" hx-include="#right-input">Commit</button>
-                <button class="btn-merge" hx-post="/merge" hx-target="#middle-display" hx-include="#right-input">Merge to Main</button>
+        <!-- Middle Column -->
+        <div class="column" style="height: 100%; display: flex; flex-direction: column;">
+            <h4 class="ui top attached block header">Production (Preview)</h4>
+            <div id="middle-display" class="ui attached segment" 
+                 style="flex: 1; overflow-y: auto; background: #fff; padding: 0;">
+                <pre class="line-numbers" style="margin: 0; height: 100%; border: none;"><code id="middle-code" class="language-html" hx-get="/source/branch/master" hx-trigger="load">Loading...</code></pre>
             </div>
-        </form>
+        </div>
+
+        <div class="column" style="height: 100%; display: flex; flex-direction: column;">
+            <h4 class="ui top attached block header">Dev Branch B</h4>
+            <div class="code-editor">
+                <pre id="right-pre" class="line-numbers"><code id="right-code" class="language-html"></code></pre>
+                <textarea id="right-input" name="code" 
+                          hx-get="/source/branch/branch-b" 
+                          hx-trigger="load" 
+                          hx-swap="none"
+                          spellcheck="false"
+                          oninput="syncEditor('right-input', 'right-code')"
+                          onscroll="syncScroll('right-input', 'right-pre')">Loading...</textarea>
+            </div>
+            <div class="ui two bottom attached buttons">
+                <button class="ui primary button" hx-post="/render" hx-target="#middle-code" hx-include="#right-input">Commit</button>
+                <button class="ui violet button" hx-post="/merge" hx-target="#middle-code" hx-include="#right-input">Merge</button>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
+    function syncEditor(textareaId, codeId) {
+        const textarea = document.getElementById(textareaId);
+        const code = document.getElementById(codeId);
+        
+        // Update content
+        let text = textarea.value;
+        if (text[text.length - 1] === "\n") text += " ";
+        code.textContent = text;
+        
+        // Highlight
+        Prism.highlightElement(code);
+    }
+
+    function syncScroll(textareaId, preId) {
+        const textarea = document.getElementById(textareaId);
+        const pre = document.getElementById(preId);
+        pre.scrollTop = textarea.scrollTop;
+        pre.scrollLeft = textarea.scrollLeft;
+    }
+
+    // Handle HTMX updates
     document.body.addEventListener('htmx:afterRequest', function(evt) {
-        // Check if the triggering element is one of our textareas
-        if (evt.detail.elt.tagName === 'TEXTAREA' && (evt.detail.elt.id === 'left-input' || evt.detail.elt.id === 'right-input')) {
-            // Directly set the value property to the response text
-            evt.detail.elt.value = evt.detail.xhr.responseText;
+        const elt = evt.detail.elt;
+        
+        // Handle Editors
+        if (elt.tagName === 'TEXTAREA' && (elt.id === 'left-input' || elt.id === 'right-input')) {
+            elt.value = evt.detail.xhr.responseText;
+            syncEditor(elt.id, elt.id.replace('input', 'code'));
         }
+        
+        // Handle Middle Display
+        if (elt.id === 'middle-code') {
+           // Ensure the content is treated as text, not HTML to be rendered
+           // HTMX swaps innerHTML by default. If the response is HTML, it will render.
+           // We want to show the SOURCE code.
+           // So we need to escape the content and set it as textContent, THEN highlight.
+           
+           // Actually, if we target a <code> block, HTMX puts the response inside it.
+           // If the response is `<h1>Hi</h1>`, the DOM becomes <code><h1>Hi</h1></code> (rendered H1)
+           // We want <code>&lt;h1&gt;Hi&lt;/h1&gt;</code> (visible code).
+           
+           // We can use htmx:beforeSwap to modify the content? Or just fix it after.
+           // Let's fix it after.
+           
+           // Wait, if it's already in the DOM as elements, Prism might try to highlight it but it won't look like code source.
+           // It's safer to treat the response as text.
+           
+           evt.detail.target.textContent = evt.detail.xhr.responseText;
+           Prism.highlightElement(evt.detail.target);
+        }
+    });
+
+    // Initial sync
+    window.addEventListener('load', () => {
+        syncEditor('left-input', 'left-code');
+        syncEditor('right-input', 'right-code');
     });
 </script>
 
