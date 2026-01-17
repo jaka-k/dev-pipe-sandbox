@@ -1,11 +1,14 @@
 package main
 
 import (
+	"dev-pipe-sandbox/operations"
 	"log"
 	"net/http"
 )
 
 func main() {
+
+	repo := operations.GetRepo()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "serve/index.html")
